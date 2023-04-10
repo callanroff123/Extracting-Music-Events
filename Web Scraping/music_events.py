@@ -4,6 +4,7 @@
 ### This should save time spent browsing across multiple event webpages. #####################################
 ##############################################################################################################
 
+
 # 1. Load required libraries.
 import numpy as np
 import pandas as pd
@@ -23,7 +24,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from pynput.keyboard import Key, Controller
 
-# 2. Specify credentials and defaults
+
+# 2. Specify defaults
 options = Options()
 options.add_argument("--disable-infobars")
 options.add_argument("--disable-extensions")
@@ -42,6 +44,19 @@ venues = [
     "Miscellania",
     "Melbourne Recital Centre",
     "280 Sydney Rd"
+]
+addresses = [
+    "2/401 Swanston St, VIC, Australia",
+    "314 Sydney Rd, VIC, Australia",
+    "137-141 Johnston St, VIC, Australia",
+    "607 High St, VIC, Australia",
+    "57 Swan St, VIC, Australia",
+    "216 High St, VIC, Australia",
+    "301 High St, VIC, Australia",
+    "51 Brunswick St, VIC, Australia",
+    "280 Sydney Road, VIC, Australia",
+    "Flinders Ct, VIC, Australia",
+    "31 Sturt St, VIC, Australia"
 ]
 
 
@@ -272,6 +287,110 @@ def get_events_eventbrite():
     return(df_final)
 
 
+def get_events_humanitix():
+    '''
+        Gets events from humanitix.com
+        Here we need to input the addresses, rather than the names of the venues
+    '''
+    driver = webdriver.Chrome(
+        executable_path="C:\\Users\\callanroff\\Desktop\\learnings\\Web Scraping/chromedriver_mac64\\chromedriver",
+        chrome_options=options
+    )
+    driver.get("https://www.humanitix.com/au")
+    time.sleep(2)
+    df_final = pd.DataFrame({
+        "Title": [""],
+        "Date": [""],
+        "Venue": [""],
+        "Venue1": [""],
+        "Link": [""]
+    })
+    for venue in addresses:
+        try:
+            search = venue
+            driver.find_element(
+                By.XPATH,
+                '/html/body/div/main/div[1]/div[2]/div[2]/a[1]'
+            ).click()
+            time.sleep(2)
+            search_box = driver.find_element(
+                By.XPATH,
+                '/html/body/div/main/section[1]/div/form/div[3]/input'
+            )
+            search_box.send_keys(search)
+            search_box.send_keys(Keys.ENTER)
+            time.sleep(2)
+            soup = BeautifulSoup(
+                driver.page_source, "html"
+            )
+            postings = soup.find(
+                "div", {"class": "sc-7cff7b5b-1 fTZqOn"}).find_all("a")
+            df = pd.DataFrame({
+                "Title": [""],
+                "Date": [""],
+                "Venue": [""],
+                "Venue1": [""],
+                "Link": [""]
+            })
+            for post in postings:
+                title = post.find(
+                    "h6", {"class": "sc-404b905e-0 sc-3f9a5f4d-4 hkMovf gEFIA-D"}).text.strip()
+                date = post.find(
+                    "p", {"class": "sc-8821f522-0 sc-3f9a5f4d-3 swyla ivJltS"}).text.strip()
+                ven = venue.split(",", 1)[0]
+                ven1 = post.find(
+                    "p", {"class": "sc-8821f522-0 sc-3f9a5f4d-5 swyla kCaHDk"}).text.strip()
+                link = post.get("href")
+                df = df.append({
+                    "Title": title,
+                    "Date": date,
+                    "Venue": ven,
+                    "Venue1": ven1,
+                    "Link": link
+                }, ignore_index=True)
+                df = df.reset_index(drop=True)
+            df_final = df_final.append(df, ignore_index=True)
+            driver.find_element(
+                By.XPATH,
+                '/html/body/div/header/a'
+            ).click()
+            time.sleep(2)
+        except:
+            pass
+    df_final = df_final[df_final["Title"] != ""].reset_index(drop=True)
+    df_final["correct_venue_flag"] = np.zeros(df_final.shape[0])
+    for i in range(df_final.shape[0]):
+        if df_final["Venue"][i] in df_final["Venue1"][i]:
+            df_final["correct_venue_flag"][i] = 1
+        else:
+            df_final["correct_venue_flag"][i] = 0
+    df_final = df_final[df_final["correct_venue_flag"] == 1][[
+        "Title",
+        "Date",
+        "Venue",
+        "Link"
+    ]].reset_index(drop=True)
+    address_venue_mapping = {
+        "2/401 Swanston St": "Miscellania",
+        "314 Sydney Rd": "Brunswick Ballroom",
+        "137-141 Johnston St": "The Night Cat",
+        "607 High St": "Croxton Bandroom",
+        "57 Swan St": "Corner Hotel",
+        "216 High St, VIC, Australia": "Northcote Theatre",
+        "301 High St, VIC, Australia": "Northcote Social Club",
+        "51 Brunswick St, VIC, Australia": "The Workers Club",
+        "280 Sydney Road, VIC, Australia": "The Retreat",
+        "Flinders Ct, VIC, Australia": "Sub Club",
+        "31 Sturt St, VIC, Australia": "Melbourne Recital Centre"
+    }
+    df_final["Venue"] = df_final["Venue"].apply(
+        lambda x: address_venue_mapping[x]
+    )
+    df_final["Date"] = [item[1] + " " + item[2] + " " + item[3][:-1]
+                        for item in df_final["Date"].str.split(" ")]
+    return(df_final)
+
+
 def get_all_events():
     '''
         Concatenates results across various sources, and performs some additional cleaning
@@ -279,6 +398,7 @@ def get_all_events():
     df_moshtix = get_events_moshtix()
     df_oztix = get_events_oztix()
     df_eventbrite = get_events_eventbrite()
+    df_humanitix = get_events_humanitix()
     month_mapping = {
         "Jan": "01",
         "Feb": "02",
@@ -339,7 +459,19 @@ def get_all_events():
     )
     df_eventbrite["Date (New)"] = "2023-" + \
         df_eventbrite["Month Number"] + "-" + df_eventbrite["Day Number"]
-    df = pd.concat([df_moshtix, df_oztix, df_eventbrite],
+    df_humanitix["Day Number"] = df_humanitix["Date"].apply(
+        lambda x: "0" + x[0] if x[1] in ["s", "n", "r", "t"] else x[:2]
+    )
+    df_humanitix["Month Number"] = [
+        month_mapping[x] for x in [
+            string[:3] for string in [
+                item[1] for item in df_humanitix["Date"].str.split(" ")
+            ]
+        ]
+    ]
+    df_humanitix["Date (New)"] = "2023-" + \
+        df_humanitix["Month Number"] + "-" + df_humanitix["Day Number"]
+    df = pd.concat([df_moshtix, df_oztix, df_eventbrite, df_humanitix],
                    axis=0).reset_index(drop=True)
     df["Date"] = pd.to_datetime(df["Date (New)"], format='%Y-%m-%d')
     df["Date"] = df["Date"].apply(
@@ -363,9 +495,19 @@ def get_all_events():
     return(df_out)
 
 
-def export_events():
+def export_events(
+    venue_list=venues,
+    from_date=str(datetime.today().year) + "-" + str(datetime.today().month) + "-" + str(datetime.today().day),
+    to_date=str(datetime.today().year + 1) + "-" + str(datetime.today().month) + "-" + str(datetime.today().day),
+):
     '''
         Export output to CSV format
     '''
     df = get_all_events()
+    df = df[
+        (df["Venue"].isin(venue_list)) &
+        (pd.to_datetime(df["Date"]) >= pd.to_datetime(from_date, format="%Y-%m-%d")) &
+        (pd.to_datetime(df["Date"]) <=
+         pd.to_datetime(to_date, format="%Y-%m-%d"))
+    ]
     df.to_csv("music_events.csv")
