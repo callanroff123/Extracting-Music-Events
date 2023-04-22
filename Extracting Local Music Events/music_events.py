@@ -38,7 +38,7 @@ venues = [
     "Corner Hotel",
     "Northcote Theatre",
     "Northcote Social Club",
-    "The Workers Club",
+    #"The Workers Club",
     "The Retreat",
     "Sub Club",
     "Miscellania",
@@ -53,7 +53,7 @@ addresses = [
     "57 Swan St, VIC, Australia",
     "216 High St, VIC, Australia",
     "301 High St, VIC, Australia",
-    "51 Brunswick St, VIC, Australia",
+    #"51 Brunswick St, VIC, Australia",
     "280 Sydney Road, VIC, Australia",
     "Flinders Ct, VIC, Australia",
     "31 Sturt St, VIC, Australia"
@@ -378,7 +378,7 @@ def get_events_humanitix():
         "57 Swan St": "Corner Hotel",
         "216 High St, VIC, Australia": "Northcote Theatre",
         "301 High St, VIC, Australia": "Northcote Social Club",
-        "51 Brunswick St, VIC, Australia": "The Workers Club",
+        #"51 Brunswick St, VIC, Australia": "The Workers Club",
         "280 Sydney Road, VIC, Australia": "The Retreat",
         "Flinders Ct, VIC, Australia": "Sub Club",
         "31 Sturt St, VIC, Australia": "Melbourne Recital Centre"
@@ -507,7 +507,6 @@ def export_events(
     df = df[
         (df["Venue"].isin(venue_list)) &
         (pd.to_datetime(df["Date"]) >= pd.to_datetime(from_date, format="%Y-%m-%d")) &
-        (pd.to_datetime(df["Date"]) <=
-         pd.to_datetime(to_date, format="%Y-%m-%d"))
+        (pd.to_datetime(df["Date"]) <= pd.to_datetime(to_date, format="%Y-%m-%d"))
     ]
     df.to_csv("music_events.csv")
