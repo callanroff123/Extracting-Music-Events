@@ -38,7 +38,7 @@ def send_music_event_email(sender, sender_password, receiver, from_date, to_date
 
 
 # Run the above function with the specified inputs
-def run():
+def run_send_email():
     credentials = json.load(
         open("/Users/callanroff/Desktop/Acc. Keyzzz/webscraping_email_creds.json", "r")
     )
