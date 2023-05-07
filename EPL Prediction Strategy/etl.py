@@ -551,7 +551,7 @@ def clean_augmented_epl_data():
     df["DIFF_HA_LAST_5_LOSSES"] = df["HOME_TEAM_LOSSES_LAST_5"] - df["AWAY_TEAM_LOSSES_LAST_5"]
     df["DIFF_HA_GD_LAST_5"] = df["HOME_TEAM_GD_LAST_5"] - df["AWAY_TEAM_GD_LAST_5"]
     df["DIFF_HA_PTS_THIS_SEASON"] = df["HOME_TEAM_PTS"] - df["AWAY_TEAM_PTS"]
-    df["DIFF_HA_CURRENT_POSITION"] = df["HOME_TEAM_POSITION"] - df["HOME_TEAM_POSITION"]
+    df["DIFF_HA_CURRENT_POSITION"] = df["HOME_TEAM_POSITION"] - df["AWAY_TEAM_POSITION"]
     df["TOT_GOALS"] = df["FTHG"] + df["FTAG"]
     df_final = df[[
         "HOME_TEAM",
