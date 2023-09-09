@@ -20,7 +20,7 @@ def send_music_event_email(sender, sender_password, receiver, from_date, to_date
     msg["To"] = ",".join(receiver)
     part = MIMEBase("application", "octet-stream")
     part.set_payload(
-        open("/Users/callanroff/Desktop/learnings/Extracting-Local-Music-Events/music_events.csv", "rb").read()
+        open("/Users/callanroff/Desktop/learnings/Extracting-Local-Music-Events/app/music_events.csv", "rb").read()
     )
     encoders.encode_base64(part)
     part.add_header(

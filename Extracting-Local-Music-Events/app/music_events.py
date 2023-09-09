@@ -236,7 +236,6 @@ def get_events_eventbrite():
             executable_path="C:\\Users\\callanroff\\Desktop\\learnings\\Web Scraping/chromedriver_mac64\\chromedriver",
             chrome_options=options
         )
-    driver.get("https://www.eventbrite.com.au/")
     time.sleep(2)
     df_final = pd.DataFrame({
         "Title": [""],
@@ -247,24 +246,13 @@ def get_events_eventbrite():
     })
     for venue in venues:
         try:
-            search = venue
-            driver.find_element(
-                By.XPATH,
-                '/html/body/div[2]/div/div[1]/div/div/header/div/div[1]/div[1]/button/div/div/div/div'
-            ).click()
-            time.sleep(2)
-            search_box = driver.find_element(
-                By.XPATH,
-                '/html/body/div[2]/div[2]/div/div/div/div/div[1]/div/div/main/div/div/div/main/header/div/form/div/div/div/div/input'
-            )
-            search_box.send_keys(search)
-            search_box.send_keys(Keys.ENTER)
+            driver.get(f"https://www.eventbrite.com.au/d/australia--melbourne/{venue.replace(' ', '-')}/")
             time.sleep(2)
             soup = BeautifulSoup(
                 driver.page_source, "html"
             )
             postings = soup.find_all(
-                "div", {"class": "search-event-card-wrapper"})
+                "li", {"class": "search-main-content__events-list-item search-main-content__events-list-item__mobile"})
             df = pd.DataFrame({
                 "Title": [""],
                 "Date": [""],
@@ -274,14 +262,14 @@ def get_events_eventbrite():
             })
             for post in postings:
                 title = post.find(
-                    "div", {"class": "eds-event-card__formatted-name--is-clamped eds-event-card__formatted-name--is-clamped-three eds-text-weight--heavy"}).text.strip()
-                date = post.find(
-                    "div", {"class": "eds-event-card-content__sub-title eds-text-color--primary-brand eds-l-pad-bot-1 eds-l-pad-top-2 eds-text-weight--heavy eds-text-bm"}).text.strip()
+                    "h2", {"class": "Typography_root__4bejd #3a3247 Typography_body-lg__4bejd event-card__clamp-line--two Typography_align-match-parent__4bejd"}).text.strip()
                 ven = venue.split(",", 1)[0]
-                ven1 = post.find(
-                    "div", {"data-subcontent-key": "location"}).text.strip()
+                ven1 = post.find_all(
+                    "p", {"class": "Typography_root__4bejd #585163 Typography_body-md__4bejd event-card__clamp-line--one Typography_align-match-parent__4bejd"})[0].text.strip()
+                date = post.find_all(
+                    "p", {"class": "Typography_root__4bejd #585163 Typography_body-md__4bejd event-card__clamp-line--one Typography_align-match-parent__4bejd"})[1].text.strip()
                 link = post.find(
-                    "a", {"tabindex": "0"}).get("href")
+                    "a", {"class": "event-card-link"}).get("href")
                 df = pd.concat(
                     [df, pd.DataFrame({
                         "Title": title,
@@ -301,10 +289,6 @@ def get_events_eventbrite():
                 df = df.reset_index(drop=True)
             df_final = pd.concat([df_final, df], axis = 0).reset_index(drop = True)
             #df_final = df_final.append(df, ignore_index=True)
-            driver.find_element(
-                By.XPATH,
-                '/html/body/div[2]/div/div[1]/header/div/div[1]/a/i'
-            ).click()
             time.sleep(2)
         except:
             pass
@@ -512,13 +496,14 @@ def get_all_events():
     else:
         pass
     if df_eventbrite.shape[0] > 0:
-        df_eventbrite["Day Number"] = str(np.zeros(df_eventbrite.shape[0]))
-        df_eventbrite["Month Number"] = str(np.zeros(df_eventbrite.shape[0]))
+        df_eventbrite["Day Number"] = np.zeros(len(df_eventbrite)).astype("object")
+        df_eventbrite["Month Number"] = np.zeros(len(df_eventbrite)).astype("object")
         for i in range(df_eventbrite.shape[0]):
-            if df_eventbrite["Date"][i][-7] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
-                df_eventbrite["Day Number"][i] = df_eventbrite["Date"][i][-7:-
-                                                                        5].replace(" ", "")
-                df_eventbrite["Month Number"][i] = month_mapping[df_eventbrite["Date"][i][0:3]]
+            if df_eventbrite["Date"][i][0] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                df_eventbrite["Day Number"][i] = df_eventbrite["Date"][i][0:2] if df_eventbrite["Date"][i][1] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] else "0" + df_eventbrite["Date"][i][0]
+                df_eventbrite["Month Number"][i] = month_mapping[
+                    df_eventbrite["Date"][i].replace(" ", "")[1:4] if df_eventbrite["Date"][i][1] not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] else df_eventbrite["Date"][i].replace(" ", "")[2:5]
+                ]
             elif df_eventbrite["Date"][i][0] == "y":
                 df_eventbrite["Day Number"][i] = str(datetime.today().day)
                 df_eventbrite["Month Number"][i] = str(datetime.today().month)
@@ -527,6 +512,11 @@ def get_all_events():
                     pd.to_datetime(datetime.today() + timedelta(days=1))).day)
                 df_eventbrite["Month Number"][i] = str(datetime.date(
                     pd.to_datetime(datetime.today() + timedelta(days=1))).month)
+            else:
+                df_eventbrite["Day Number"][i] = str(datetime.date(
+                    pd.to_datetime(datetime.today() + timedelta(days=2))).day)
+                df_eventbrite["Month Number"][i] = str(datetime.date(
+                    pd.to_datetime(datetime.today() + timedelta(days=2))).month)
         df_eventbrite["Day Number"] = df_eventbrite["Day Number"].apply(
             lambda x: "0" +
             x.replace(" ", "") if len(x.replace(" ", "")) == 1 else x
@@ -597,3 +587,4 @@ def export_events(
 
 if __name__ == "__main__":
     export_events()
+
