@@ -44,7 +44,12 @@ venues = [
     "Sub Club",
     "Miscellania",
     "Melbourne Recital Centre",
-    "280 Sydney Rd"
+    "280 Sydney Rd",
+    "Max Watt's Melbourne",
+    "Sidney Myer Music Bowl",
+    "Forum Melbourne",
+    "Howler",
+    "The Toff in Town"
 ]
 addresses = [
     "2/401 Swanston St, VIC, Australia",
@@ -57,7 +62,12 @@ addresses = [
     "51 Brunswick St, VIC, Australia",
     "280 Sydney Road, VIC, Australia",
     "Flinders Ct, VIC, Australia",
-    "31 Sturt St, VIC, Australia"
+    "31 Sturt St, VIC, Australia",
+    "125 Swanston St, VIC, Australia",
+    "Linlithgow Ave, VIC, Australia",
+    "154 Flinders St, VIC, Australia",
+    "7-11 Dawson St, VIC, Australia",
+    "2/252 Swanston St, VIC, Australia"
 ]
 
 
@@ -446,6 +456,96 @@ def get_events_humanitix():
     return(df_final)
 
 
+def get_events_ticketek():
+    '''
+        Gets events from premier.ticketek.com.au (for the Forum only)
+    '''
+    try:
+        driver = webdriver.Chrome()
+    except:
+        driver = webdriver.Chrome(
+            executable_path="C:\\Users\\callanroff\\Desktop\\learnings\\Web Scraping/chromedriver_mac64\\chromedriver",
+            chrome_options=options
+        )
+    driver.get("https://premier.ticketek.com.au")
+    time.sleep(2)
+    df = pd.DataFrame({
+        "Title": [""],
+        "Date": [""],
+        "Venue": [""],
+        "Venue1": [""],
+        "Link": [""]
+    })
+    venue = "Forum Melbourne"
+    search = venue
+    search_box = driver.find_element(
+        By.XPATH,
+        '/html/body/form/header/div/div[3]/div/input'
+    )
+    search_box.send_keys(search)
+    search_box.send_keys(Keys.ENTER)
+    time.sleep(2)
+    soup = BeautifulSoup(
+        driver.page_source, "html"
+    )
+    results_raw = soup.find_all(
+        "div", {"class": "contentEvent"}
+    )
+    result_titles = [results_raw[i].find("h6").text.strip() for i in range(len(results_raw))]
+    result_index = result_titles.index(venue)
+    result_link = "https://premier.ticketek.com.au" + soup.find_all(
+        "a", {"class": "blueGradientButton"}
+    )[result_index].get("href")
+    driver.get(result_link)
+    soup = BeautifulSoup(
+        driver.page_source, "html"
+    )
+    postings = soup.find_all(
+        "div", {"class": "show"}
+    )
+    for post in postings:
+        text = post.find(
+            "div", {"class": "text-content"}
+        )
+        title = text.find("h3").text.strip()
+        ven = venue.split(",", 1)[0]
+        ven1 = text.find_all("p")[-1].text.strip()
+        date = text.find_all("p")[-2].text.strip()
+        link = post.find(
+            "a", {"class": "btn btn-primary"}
+        ).get("href")
+        df = pd.concat(
+            [df, pd.DataFrame({
+                "Title": title,
+                "Date": date,
+                "Venue": ven,
+                "Venue1": ven1,
+                "Link": link
+            }, index = [0])], axis = 0
+        ).reset_index(drop = True)
+        #df = df.append({
+        #   "Title": title,
+        #    "Date": date,
+        #    "Venue": ven,
+        #    "Venue1": ven1,
+        #    "Link": link
+        #}, ignore_index=True)
+        df = df.reset_index(drop=True)
+    df = df[df["Title"] != ""].reset_index(drop=True)
+    df["correct_venue_flag"] = np.zeros(df.shape[0])
+    for i in range(df.shape[0]):
+        if df["Venue"][i] in df["Venue1"][i]:
+            df["correct_venue_flag"][i] = 1
+        else:
+            df["correct_venue_flag"][i] = 0
+    df = df[[
+        "Title",
+        "Date",
+        "Venue",
+        "Link"]]
+    return(df)
+
+
 def get_all_events():
     '''
         Concatenates results across various sources, and performs some additional cleaning
@@ -454,6 +554,7 @@ def get_all_events():
     df_oztix = get_events_oztix()
     df_eventbrite = get_events_eventbrite()
     df_humanitix = get_events_humanitix()
+    df_ticketek = get_events_ticketek()
     month_mapping = {
         "Jan": "01",
         "Feb": "02",
@@ -544,7 +645,20 @@ def get_all_events():
             df_humanitix["Month Number"] + "-" + df_humanitix["Day Number"]
     else:
         pass
-    df = pd.concat([df for df in [df_moshtix, df_oztix, df_eventbrite, df_humanitix] if df.shape[0] > 0],
+    if df_ticketek.shape[0] > 0:
+        df_ticketek["Day Number"] = np.zeros(len(df_ticketek))
+        df_ticketek["Month Number"] = np.zeros(len(df_ticketek))
+        for i in range(len(df_ticketek)):
+            if df_ticketek["Date"][i][5] == " ":
+                df_ticketek["Day Number"][i] = "0" + df_ticketek["Date"][i][4]
+                df_ticketek["Month Number"][i] = month_mapping[df_ticketek["Date"][i][6:9]]
+            else:
+                df_ticketek["Day Number"][i] = df_ticketek["Date"][i][4:6]
+                df_ticketek["Month Number"][i] = month_mapping[df_ticketek["Date"][i][7:10]]
+        df_ticketek["Date (New)"] = "2023-" + df_ticketek["Month Number"] + "-" + df_ticketek["Day Number"]
+    else:
+        pass
+    df = pd.concat([df for df in [df_moshtix, df_oztix, df_eventbrite, df_humanitix, df_ticketek] if df.shape[0] > 0],
                    axis=0).reset_index(drop=True)
     df["Date"] = pd.to_datetime(df["Date (New)"], format='%Y-%m-%d')
     df["Date"] = df["Date"].apply(
@@ -587,4 +701,3 @@ def export_events(
 
 if __name__ == "__main__":
     export_events()
-
