@@ -27,6 +27,7 @@ from pynput.keyboard import Key, Controller
 
 
 # 2. Specify defaults
+year = str(datetime.today().year)
 options = Options()
 options.add_argument("--disable-infobars")
 options.add_argument("--disable-extensions")
@@ -83,7 +84,7 @@ def get_events_moshtix():
             chrome_options=options
         )
     driver.get("https://www.moshtix.com.au/v2/")
-    time.sleep(2)
+    time.sleep(1)
     df_final = pd.DataFrame({
         "Title": [""],
         "Date": [""],
@@ -98,7 +99,7 @@ def get_events_moshtix():
         )
         search_box.send_keys(search)
         search_box.send_keys(Keys.ENTER)
-        time.sleep(2)
+        time.sleep(1)
         soup = BeautifulSoup(
             driver.page_source, "html"
         )
@@ -140,7 +141,7 @@ def get_events_moshtix():
             By.XPATH,
             '//*[@id="header"]/nav/ul/li[1]/a'
         ).click()
-        time.sleep(2)
+        time.sleep(1)
     return(df_final[df_final["Title"] != ""].reset_index(drop=True))
 
 
@@ -156,7 +157,7 @@ def get_events_oztix():
             chrome_options=options
         )
     driver.get("https://www.oztix.com.au/")
-    time.sleep(2)
+    time.sleep(1)
     df_final = pd.DataFrame({
         "Title": [""],
         "Date": [""],
@@ -166,14 +167,14 @@ def get_events_oztix():
     })
     for venue in venues:
         search = venue
-        time.sleep(2)
+        time.sleep(1)
         search_box = driver.find_element(
             By.XPATH,
             '/html/body/div[1]/div/header/div[3]/div/form/label/input'
         )
         search_box.send_keys(search)
         search_box.send_keys(Keys.ENTER)
-        time.sleep(2)
+        time.sleep(1)
         soup = BeautifulSoup(
             driver.page_source, "html"
         )
@@ -216,7 +217,7 @@ def get_events_oztix():
             By.XPATH,
             '//*[@id="app"]/div/header/div[1]/a'
         ).click()
-        time.sleep(2)
+        time.sleep(1)
     df_final = df_final[df_final["Title"] != ""].reset_index(drop=True)
     df_final["correct_venue_flag"] = np.zeros(df_final.shape[0])
     for i in range(df_final.shape[0]):
@@ -246,7 +247,7 @@ def get_events_eventbrite():
             executable_path="C:\\Users\\callanroff\\Desktop\\learnings\\Web Scraping/chromedriver_mac64\\chromedriver",
             chrome_options=options
         )
-    time.sleep(2)
+    time.sleep(1)
     df_final = pd.DataFrame({
         "Title": [""],
         "Date": [""],
@@ -257,7 +258,7 @@ def get_events_eventbrite():
     for venue in venues:
         try:
             driver.get(f"https://www.eventbrite.com.au/d/australia--melbourne/{venue.replace(' ', '-')}/")
-            time.sleep(2)
+            time.sleep(1)
             soup = BeautifulSoup(
                 driver.page_source, "html"
             )
@@ -299,7 +300,7 @@ def get_events_eventbrite():
                 df = df.reset_index(drop=True)
             df_final = pd.concat([df_final, df], axis = 0).reset_index(drop = True)
             #df_final = df_final.append(df, ignore_index=True)
-            time.sleep(2)
+            time.sleep(1)
         except:
             pass
     df_final = df_final[df_final["Title"] != ""].reset_index(drop=True)
@@ -325,6 +326,7 @@ def get_events_humanitix():
     '''
         Gets events from humanitix.com
         Here we need to input the addresses, rather than the names of the venues
+        !!! NEEDS FIXING !!!
     '''
     try:
         driver = webdriver.Chrome()
@@ -334,7 +336,7 @@ def get_events_humanitix():
             chrome_options=options
         )
     driver.get("https://www.humanitix.com/au")
-    time.sleep(2)
+    time.sleep(1)
     df_final = pd.DataFrame({
         "Title": [""],
         "Date": [""],
@@ -349,14 +351,14 @@ def get_events_humanitix():
                 By.XPATH,
                 '/html/body/div/main/div[1]/div[2]/div[2]/a[1]'
             ).click()
-            time.sleep(2)
+            time.sleep(1)
             search_box = driver.find_element(
                 By.XPATH,
                 '/html/body/div/main/section[1]/div/form/div[3]/input'
             )
             search_box.send_keys(search)
             search_box.send_keys(Keys.ENTER)
-            time.sleep(2)
+            time.sleep(1)
             soup = BeautifulSoup(
                 driver.page_source, "html"
             )
@@ -401,7 +403,7 @@ def get_events_humanitix():
                 By.XPATH,
                 '/html/body/div/header/a'
             ).click()
-            time.sleep(2)
+            time.sleep(1)
         except:
             pass
     df_final = df_final[df_final["Title"] != ""].reset_index(drop=True)
@@ -484,7 +486,7 @@ def get_events_ticketek():
     )
     search_box.send_keys(search)
     search_box.send_keys(Keys.ENTER)
-    time.sleep(2)
+    time.sleep(1)
     soup = BeautifulSoup(
         driver.page_source, "html"
     )
@@ -577,7 +579,7 @@ def get_all_events():
         df_moshtix["Month Number"] = df_moshtix["Date"].apply(
             lambda x: month_mapping[x[-8:-5]]
         )
-        df_moshtix["Date (New)"] = "2023-" + \
+        df_moshtix["Date (New)"] = year + "-" + \
             df_moshtix["Month Number"] + "-" + df_moshtix["Day Number"]
     else:
         pass
@@ -592,7 +594,7 @@ def get_all_events():
                 ]
             ]
         ]
-        df_oztix["Date (New)"] = "2023-" + \
+        df_oztix["Date (New)"] = year + "-" + \
             df_oztix["Month Number"] + "-" + df_oztix["Day Number"]
     else:
         pass
@@ -626,7 +628,7 @@ def get_all_events():
             lambda x: "0" +
             x.replace(" ", "") if len(x.replace(" ", "")) == 1 else x
         )
-        df_eventbrite["Date (New)"] = "2023-" + \
+        df_eventbrite["Date (New)"] = year + "-" + \
             df_eventbrite["Month Number"] + "-" + df_eventbrite["Day Number"]
     else:
         pass
@@ -641,7 +643,7 @@ def get_all_events():
                 ]
             ]
         ]
-        df_humanitix["Date (New)"] = "2023-" + \
+        df_humanitix["Date (New)"] = year + "-" + \
             df_humanitix["Month Number"] + "-" + df_humanitix["Day Number"]
     else:
         pass
@@ -655,7 +657,7 @@ def get_all_events():
             else:
                 df_ticketek["Day Number"][i] = df_ticketek["Date"][i][4:6]
                 df_ticketek["Month Number"][i] = month_mapping[df_ticketek["Date"][i][7:10]]
-        df_ticketek["Date (New)"] = "2023-" + df_ticketek["Month Number"] + "-" + df_ticketek["Day Number"]
+        df_ticketek["Date (New)"] = year + "-" + df_ticketek["Month Number"] + "-" + df_ticketek["Day Number"]
     else:
         pass
     df = pd.concat([df for df in [df_moshtix, df_oztix, df_eventbrite, df_humanitix, df_ticketek] if df.shape[0] > 0],
@@ -696,7 +698,7 @@ def export_events(
         (pd.to_datetime(df["Date"]) >= pd.to_datetime(from_date, format="%Y-%m-%d")) &
         (pd.to_datetime(df["Date"]) <= pd.to_datetime(to_date, format="%Y-%m-%d"))
     ]
-    df.to_csv("music_events.csv")
+    df.to_csv("./music_events.csv")
     
 
 if __name__ == "__main__":

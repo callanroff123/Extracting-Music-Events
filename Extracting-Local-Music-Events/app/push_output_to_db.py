@@ -43,7 +43,7 @@ def to_postgresql(connection_params, schema_name, table_name):
     )
     conn.close()
 
-# Run the script for desired inputs
+# Run DB collection pipeline
 def run_postgres_push():
     connection_params = json.load(
         open("/Users/callanroff/Desktop/Acc. Keyzzz/postgresql_conn_params.json", "r")

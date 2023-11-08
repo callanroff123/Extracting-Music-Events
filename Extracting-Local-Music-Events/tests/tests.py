@@ -28,7 +28,12 @@ input_venues = [
     "Sub Club",
     "Miscellania",
     "Melbourne Recital Centre",
-    "280 Sydney Rd"
+    "280 Sydney Rd",
+    "Max Watt's Melbourne",
+    "Sidney Myer Music Bowl",
+    "Forum Melbourne",
+    "Howler",
+    "The Toff in Town"
 ]
 
 
