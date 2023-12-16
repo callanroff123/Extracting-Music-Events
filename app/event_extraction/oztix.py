@@ -5,6 +5,7 @@
 ### * Corner Hotel #############
 ### * Croxton Bandroom #########
 ### * Max Watt's Melbourne #####
+### * Gasometer ################
 ################################
 
 
@@ -43,7 +44,9 @@ venues_oztix = [
         "The Workers Club",
         "Corner Hotel",
         "Croxton Bandroom",
-        "Max Watt's Melbourne"
+        "Max Watt's Melbourne",
+        "Gasometer (Upstairs)",
+        "Gasometer Downstairs"
     ]
 ]
 

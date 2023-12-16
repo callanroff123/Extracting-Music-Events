@@ -5,6 +5,8 @@
 ### * Northcote Theatre ####
 ### * The Night Cat ########
 ### * Howler ###############
+### * Kindred Bandroom #####
+### * 170 Russell ##########
 ############################
 
 
@@ -43,7 +45,9 @@ venues_moshtix = [
         "The Toff in Town",
         "Northcote Theatre",
         "The Night Cat",
-        "Howler"
+        "Howler",
+        "Kindred Bandroom",
+        "170 Russell"
     ]
 ]
 
