@@ -1,2 +1,2 @@
-# learnings
-A coding self-discovery journey.
+# Extracting Local Music Events
+This is a web-scraping project dedicated to my love of live music. The idea is to scrape event data from various ticketing websites, consolidate them into a simple csv file, then automate an email containing the results to myself and others interested. Spending too much time manaully scrolling thru social media to find something to do this weekend? Fahwwwget abowwt it!
