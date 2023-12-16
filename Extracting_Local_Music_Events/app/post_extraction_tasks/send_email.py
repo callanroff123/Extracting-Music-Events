@@ -10,6 +10,7 @@ import numpy as np
 import os
 import json
 from datetime import datetime
+from app import config
 
 
 # Function to send emails
@@ -20,7 +21,7 @@ def send_music_event_email(sender, sender_password, receiver, from_date, to_date
     msg["To"] = ",".join(receiver)
     part = MIMEBase("application", "octet-stream")
     part.set_payload(
-        open("/Users/callanroff/Desktop/learnings/Extracting-Local-Music-Events/app/music_events.csv", "rb").read()
+        open(str(config.OUTPUT_PATH) + "/music_events.csv", "rb").read()
     )
     encoders.encode_base64(part)
     part.add_header(
@@ -54,6 +55,4 @@ def run_send_email():
         from_date = from_date,
         to_date = to_date
     )
-
-if __name__ == "__main__":
-    run_send_email()
+    print("Email sent!")

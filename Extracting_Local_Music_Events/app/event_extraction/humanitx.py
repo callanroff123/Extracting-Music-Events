@@ -1,8 +1,7 @@
-##############################################################################################################
-### This program extracts music events from some of my favourite venues across Melbourne. ####################
-### The aim is to compile the events into an organised output table, which can be filtered easily by date. ###
-### This should save time spent browsing across multiple event webpages. #####################################
-##############################################################################################################
+#########################################
+### Gets events from: ###################
+### * Miscellania (2/401 Swanston St) ###
+#########################################
 
 
 # 1. Load required libraries.
@@ -24,7 +23,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from pynput.keyboard import Key, Controller
-
+from app.config import venues, addresses, venue_address_mapping, address_venue_mapping
 
 # 2. Specify defaults
 year = str(datetime.today().year)
@@ -33,93 +32,14 @@ options.add_argument("--disable-infobars")
 options.add_argument("--disable-extensions")
 options.add_argument("start-maximized")
 options.add_argument("--disable-notifications")
-venues = [
-    "Brunswick Ballroom",
-    "The Night Cat",
-    "Croxton Bandroom",
-    "Corner Hotel",
-    "Northcote Theatre",
-    "Northcote Social Club",
-    "The Workers Club",
-    "The Retreat",
-    "Sub Club",
-    "Miscellania",
-    "Melbourne Recital Centre",
-    "280 Sydney Rd",
-    "Max Watt's Melbourne",
-    "Sidney Myer Music Bowl",
-    "Forum Melbourne",
-    "Howler",
-    "The Toff in Town"
-]
-addresses = [
-    "2/401 Swanston St, VIC, Australia",
-    "314 Sydney Rd, VIC, Australia",
-    "137-141 Johnston St, VIC, Australia",
-    "607 High St, VIC, Australia",
-    "57 Swan St, VIC, Australia",
-    "216 High St, VIC, Australia",
-    "301 High St, VIC, Australia",
-    "51 Brunswick St, VIC, Australia",
-    "280 Sydney Road, VIC, Australia",
-    "Flinders Ct, VIC, Australia",
-    "31 Sturt St, VIC, Australia",
-    "125 Swanston St, VIC, Australia",
-    "Linlithgow Ave, VIC, Australia",
-    "154 Flinders St, VIC, Australia",
-    "7-11 Dawson St, VIC, Australia",
-    "2/252 Swanston St, VIC, Australia"
-]
-address_venue_mapping = {
-    "2/401 Swanston St": "Miscellania",
-    "314 Sydney Rd": "Brunswick Ballroom",
-    "137-141 Johnston St": "The Night Cat",
-    "607 High St": "Croxton Bandroom",
-    "57 Swan St": "Corner Hotel",
-    "216 High St": "Northcote Theatre",
-    "301 High St": "Northcote Social Club",
-    "51 Brunswick St": "The Workers Club",
-    "280 Sydney Road": "The Retreat",
-    "Flinders Ct": "Sub Club",
-    "31 Sturt St": "Melbourne Recital Centre",
-    "125 Swanston St, VIC, Australia": "Max Watt's Melbourne",
-    "Linlithgow Ave, VIC, Australia": "Sidney Myer Music Bowl",
-    "154 Flinders St, VIC, Australia": "Forum Melbourne",
-    "7-11 Dawson St, VIC, Australia": "Howler",
-    "2/252 Swanston St, VIC, Australia": "The Toff in Town"
-}
-venue_address_mapping = {
-    "Miscellania": "2/401 Swanston St",
-    "Brunswick Ballroom": "314 Sydney Rd",
-    "The Night Cat":"137-141 Johnston St",
-    "Croxton Bandroom": "607 High St",
-    "Corner Hotel": "57 Swan St",
-    "Northcote Theatre": "216 High St",
-    "Northcote Social Club": "301 High St",
-    "The Workers Club": "51 Brunswick St",
-    "The Retreat": "280 Sydney Road",
-    "Sub Club": "Flinders Ct",
-    "Melbourne Recital Centre": "31 Sturt St",
-    "Max Watt's Melbourne": "125 Swanston St, VIC, Australia",
-    "Sidney Myer Music Bowl": "Linlithgow Ave, VIC, Australia",
-    "Forum Melbourne": "154 Flinders St, VIC, Australia",
-    "Howler": "7-11 Dawson St, VIC, Australia",
-    "The Toff in Town": "2/252 Swanston St, VIC, Australia"
-}
+venues_humanitix = [i for i in venues if i in ["Miscellania"]]
+
 
 def get_events_humanitix():
     '''
         Gets events from humanitix.com
-        Here we need to input the addresses, rather than the names of the venues
-        !!! NEEDS FIXING !!!
     '''
-    try:
-        driver = webdriver.Chrome()
-    except:
-        driver = webdriver.Chrome(
-            executable_path="C:\\Users\\callanroff\\Desktop\\learnings\\Web Scraping/chromedriver_mac64\\chromedriver",
-            chrome_options=options
-        )
+    driver = webdriver.Chrome()
     driver.get("https://www.humanitix.com/au")
     time.sleep(1)
     df_final = pd.DataFrame({
@@ -129,7 +49,7 @@ def get_events_humanitix():
         "Venue1": [""],
         "Link": [""]
     })
-    for venue in ["Miscellania"]:
+    for venue in venues_humanitix:
         try:
             search = venue
             driver.find_element(
@@ -147,7 +67,6 @@ def get_events_humanitix():
             )
             search_box.send_keys(search)
             loc_box.send_keys("Melbourne")
-            #search_box.send_keys(Keys.ENTER)
             driver.find_element(
                 By.XPATH,
                 '/html/body/div/main/section[1]/div/form/div[3]/button[2]'
@@ -185,18 +104,10 @@ def get_events_humanitix():
                                 "Link": link
                             }, index = [0])], axis = 0
                         ).reset_index(drop = True)
-                        #df = df.append({
-                        #   "Title": title,
-                        #    "Date": date,
-                        #    "Venue": ven,
-                        #    "Venue1": ven1,
-                        #    "Link": link
-                        #}, ignore_index=True)
                         df = df.reset_index(drop=True)
                 else:
                     pass
                 df_final = pd.concat([df_final, df], axis = 0).reset_index(drop = True)
-                #df_final = df_final.append(df, ignore_index=True)
                 driver.find_element(
                     By.XPATH,
                     '/html/body/div/header/a'
@@ -229,6 +140,3 @@ def get_events_humanitix():
     df_final["Date"] = [item[1] + " " + item[2] + " " + item[3][:-1]
                         for item in df_final["Date"].str.split(" ")]
     return(df_final)
-
-
-get_events_humanitix()
