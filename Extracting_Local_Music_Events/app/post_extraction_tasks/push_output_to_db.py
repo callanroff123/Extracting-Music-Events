@@ -3,6 +3,8 @@ import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 import json
+from app import config
+
 
 # Pushes music_events.csv into our web-scraped database
 def to_postgresql(connection_params, schema_name, table_name):
@@ -13,7 +15,7 @@ def to_postgresql(connection_params, schema_name, table_name):
         password = connection_params["password"]
     )
     engine = create_engine('postgresql://' + connection_params["user"] + ':' + connection_params["password"] + '@' + connection_params["host"] + ':5432/' + connection_params["database"])
-    df = pd.read_csv("music_events.csv")
+    df = pd.read_csv(str(config.OUTPUT_PATH) + "/music_events.csv")
     df = df[["Title", "Date", "Venue", "Link"]]
     df = df.rename(columns = {
         "Title": "TITLE",
