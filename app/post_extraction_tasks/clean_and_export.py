@@ -21,7 +21,7 @@ from app.event_extraction.humanitx import get_events_humanitix
 from app.event_extraction.moshtix import get_events_moshtix
 from app.event_extraction.oztix import get_events_oztix
 from app.event_extraction.ticketek import get_events_ticketek
-from app.config import venues, addresses, venue_address_mapping, address_venue_mapping
+from app.config import venues, addresses, venue_address_mapping, address_venue_mapping, OUTPUT_PATH
 
 
 #2. Specify defaults.
@@ -187,4 +187,4 @@ def export_events(
         (pd.to_datetime(df["Date"]) >= pd.to_datetime(from_date, format="%Y-%m-%d")) &
         (pd.to_datetime(df["Date"]) <= pd.to_datetime(to_date, format="%Y-%m-%d"))
     ]
-    df.to_csv("../output/music_events.csv", index = False)
+    df.to_csv(str(OUTPUT_PATH) + "/music_events.csv", index = False)
