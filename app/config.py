@@ -31,7 +31,11 @@ venues = [
     "Sidney Myer Music Bowl",
     "Forum Melbourne",
     "Howler",
-    "The Toff in Town"
+    "The Toff in Town",
+    "Kindred Bandroom",
+    "Gasometer (Upstairs)",
+    "Gasometer Downstairs",
+    "170 Russell"
 ]
 addresses = [
     "2/401 Swanston St, VIC, Australia",
@@ -49,7 +53,10 @@ addresses = [
     "Linlithgow Ave, VIC, Australia",
     "154 Flinders St, VIC, Australia",
     "7-11 Dawson St, VIC, Australia",
-    "2/252 Swanston St, VIC, Australia"
+    "2/252 Swanston St, VIC, Australia",
+    "3 Harris St, VIC, Australia",
+    "484 Smith St, VIC, Australia",
+    "170 Russell, VIC, Australia"
 ]
 address_venue_mapping = {
     "2/401 Swanston St": "Miscellania",
@@ -67,7 +74,10 @@ address_venue_mapping = {
     "Linlithgow Ave, VIC, Australia": "Sidney Myer Music Bowl",
     "154 Flinders St, VIC, Australia": "Forum Melbourne",
     "7-11 Dawson St, VIC, Australia": "Howler",
-    "2/252 Swanston St, VIC, Australia": "The Toff in Town"
+    "2/252 Swanston St, VIC, Australia": "The Toff in Town",
+    "3 Harris St, VIC, Australia": "Kindred Bandroom",
+    "484 Smith St, VIC, Australia": "Gasometer (Upstairs)",
+    "170 Russell, VIC, Australia": "170 Russell"
 }
 venue_address_mapping = {
     "Miscellania": "2/401 Swanston St",
@@ -85,5 +95,8 @@ venue_address_mapping = {
     "Sidney Myer Music Bowl": "Linlithgow Ave, VIC, Australia",
     "Forum Melbourne": "154 Flinders St, VIC, Australia",
     "Howler": "7-11 Dawson St, VIC, Australia",
-    "The Toff in Town": "2/252 Swanston St, VIC, Australia"
+    "The Toff in Town": "2/252 Swanston St, VIC, Australia",
+    "Kindred Bandroom": "3 Harris St, VIC, Australia",
+    "Gasometer (Upstairs)": "484 Smith St, VIC, Australia",
+    "170 Russell": "170 Russell, VIC, Australia"
 }

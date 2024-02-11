@@ -21,7 +21,7 @@ from app.event_extraction.humanitx import get_events_humanitix
 from app.event_extraction.moshtix import get_events_moshtix
 from app.event_extraction.oztix import get_events_oztix
 from app.event_extraction.ticketek import get_events_ticketek
-from app.config import venues, addresses, venue_address_mapping, address_venue_mapping
+from app.config import venues, addresses, venue_address_mapping, address_venue_mapping, OUTPUT_PATH
 
 
 #2. Specify defaults.
@@ -142,6 +142,12 @@ def get_all_events():
         pass
     df = pd.concat([df for df in [df_moshtix, df_oztix, df_eventbrite, df_humanitix, df_ticketek] if df.shape[0] > 0],
                    axis=0).reset_index(drop=True)
+    df["Date Aug."] = df["Date (New)"].str[5:10]
+    for i in range(len(df)):
+        if df["Date Aug."][i] == "02-29":
+            df["Date (New)"][i] = df["Date (New)"][i][0:5] + "02-28"
+        else:
+            pass
     df["Date"] = pd.to_datetime(df["Date (New)"], format='%Y-%m-%d')
     df["Date"] = df["Date"].apply(
         lambda x:
@@ -153,6 +159,9 @@ def get_all_events():
             datetime.date(x).day
         ))
     )
+    df["Date"] = [
+        df["Date"][i] if df["Date Aug."][i] != "02-28" else df["Date"][i] + timedelta(days = 1) for i in range(len(df))
+    ]
     df_out = df[[
         "Title",
         "Date",
@@ -178,4 +187,4 @@ def export_events(
         (pd.to_datetime(df["Date"]) >= pd.to_datetime(from_date, format="%Y-%m-%d")) &
         (pd.to_datetime(df["Date"]) <= pd.to_datetime(to_date, format="%Y-%m-%d"))
     ]
-    df.to_csv("../output/music_events.csv")
+    df.to_csv(str(OUTPUT_PATH) + "/music_events.csv", index = False)
