@@ -1,9 +1,16 @@
 # Load libraries required for exportation to PostgreSQL database
+import os
 import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
-import json
-from app import config
+from src import config
+
+
+# Load environment variables
+DB_HOST = os.environ.get("DB_HOST")
+DB_DATABSE = os.environ.get("DB_DATABASE")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
 
 # Pushes music_events.csv into our web-scraped database
@@ -47,9 +54,12 @@ def to_postgresql(connection_params, schema_name, table_name):
 
 # Run DB collection pipeline
 def run_postgres_push():
-    connection_params = json.load(
-        open("/Users/callanroff/Desktop/Acc. Keyzzz/postgresql_conn_params.json", "r")
-    )
+    connection_params = {
+        "host": DB_HOST,
+        "database": DB_DATABSE,
+        "user": DB_USER,
+        "password": DB_PASSWORD
+    }
     to_postgresql(
         connection_params = connection_params, 
         schema_name="web_scraping", 

@@ -16,12 +16,12 @@ import html
 import time
 from datetime import datetime
 from datetime import timedelta
-from app.event_extraction.eventbrite import get_events_eventbrite
-from app.event_extraction.humanitx import get_events_humanitix
-from app.event_extraction.moshtix import get_events_moshtix
-from app.event_extraction.oztix import get_events_oztix
-from app.event_extraction.ticketek import get_events_ticketek
-from app.config import venues, addresses, venue_address_mapping, address_venue_mapping, OUTPUT_PATH
+from src.event_extraction.eventbrite import get_events_eventbrite
+from src.event_extraction.humanitx import get_events_humanitix
+from src.event_extraction.moshtix import get_events_moshtix
+from src.event_extraction.oztix import get_events_oztix
+from src.event_extraction.ticketek import get_events_ticketek
+from src.config import venues, addresses, venue_address_mapping, address_venue_mapping, OUTPUT_PATH
 
 
 #2. Specify defaults.

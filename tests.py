@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from datetime import timedelta
-# from app.music_events import venues as input_venues
 import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine

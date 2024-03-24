@@ -10,7 +10,13 @@ import numpy as np
 import os
 import json
 from datetime import datetime
-from app import config
+from src import config
+
+
+# Get environment variables
+EMAIL = os.environ.get("GMAIL_USER_EMAIL")
+PWD = os.environ.get("GMAIL_PASSWORD")
+APP_PWD = os.environ.get("GMAIL_APP_PASSWORD")
 
 
 # Function to send emails
@@ -40,9 +46,11 @@ def send_music_event_email(sender, sender_password, receiver, from_date, to_date
 
 # Run the above function with the specified inputs
 def run_send_email():
-    credentials = json.load(
-        open("/Users/callanroff/Desktop/Acc. Keyzzz/webscraping_email_creds.json", "r")
-    )
+    credentials = {
+        "account": EMAIL,
+        "password": PWD,
+        "app_password": APP_PWD
+    }
     sender = credentials["account"]
     sender_app_password = credentials["app_password"]
     email_list = ["callanroff@gmail.com"]

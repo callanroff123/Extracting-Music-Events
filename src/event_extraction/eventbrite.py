@@ -24,7 +24,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from pynput.keyboard import Key, Controller
-from app.config import venues, addresses, venue_address_mapping, address_venue_mapping
+from src.config import venues, addresses, venue_address_mapping, address_venue_mapping
 
 
 # 2. Specify defaults
