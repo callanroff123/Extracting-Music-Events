@@ -111,7 +111,7 @@ def get_events_eventbrite():
         "Date",
         "Venue",
         "Link"
-    ]].reset_index(drop=True)
+    ]].drop_duplicates(subset = ["Title"]).reset_index(drop=True)
     df_final["Date"] = df_final["Date"].str.replace(",", "")
     df_final["Date"] = df_final["Date"].str[4:10] + " " + \
         str(datetime.today().year)
