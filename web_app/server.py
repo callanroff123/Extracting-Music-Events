@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, EmailField
 from wtforms.fields import DateField, SelectMultipleField, SearchField
@@ -11,7 +11,10 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "xxxx"
 bootstrap = Bootstrap5(app)
-df = pd.read_csv("../output/music_events.csv")
+try:
+    df = pd.read_csv("../output/music_events.csv")
+except:
+    df = pd.read_csv("./output/music_events.csv")
 
 
 class FilterForm(FlaskForm):
@@ -68,6 +71,8 @@ def gigs():
             df_refined["Title"].str.lower().str.contains(form.search_field.data.lower()) |
             df_refined["Venue"].str.lower().str.contains(form.search_field.data.lower())
         ]
+    if len(df_refined) < len(df):
+        flash("Filter applied!")
     data_refined = df_refined.to_dict("records")
     return(render_template(
         "gigs.html",
