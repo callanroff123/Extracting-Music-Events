@@ -13,8 +13,10 @@ app.secret_key = "xxxx"
 bootstrap = Bootstrap5(app)
 try:
     df = pd.read_csv("../output/music_events.csv")
+    df = df[pd.to_datetime(df["Date"]) >= pd.to_datetime(datetime.now().date())]
 except:
     df = pd.read_csv("./output/music_events.csv")
+    df = df[pd.to_datetime(df["Date"]) >= pd.to_datetime(datetime.now().date())]
 
 
 class FilterForm(FlaskForm):
@@ -37,7 +39,7 @@ class FilterForm(FlaskForm):
 
 
 @app.route("/")
-def home():
+def index():
     return(render_template(
         "index.html"
     ))

@@ -142,13 +142,14 @@ def get_all_events():
         pass
     df = pd.concat([df for df in [df_moshtix, df_oztix, df_eventbrite, df_humanitix, df_ticketek] if df.shape[0] > 0],
                    axis=0).reset_index(drop=True)
+    df = df[df["Date (New)"].str[0:4].isin([str(datetime.now().year), str(datetime.now().year + 1)])]
     df["Date Aug."] = df["Date (New)"].str[5:10]
     for i in range(len(df)):
         if df["Date Aug."][i] == "02-29":
             df["Date (New)"][i] = df["Date (New)"][i][0:5] + "02-28"
         else:
             pass
-    df["Date"] = pd.to_datetime(df["Date (New)"], format='%Y-%m-%d')
+    df["Date"] = pd.to_datetime(df["Date (New)"].str.strip(), errors = "coerce")
     df["Date"] = df["Date"].apply(
         lambda x:
             x if x >= datetime.today() + timedelta(days=-1)

@@ -1,0 +1,9 @@
+.navbar-nav > li{
+    padding-left:30px;
+    padding-right:30px;
+}
+
+.welcome-page {
+    text-align: center;
+    justify-content: center;
+}

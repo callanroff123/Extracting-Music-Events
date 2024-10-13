@@ -17,4 +17,3 @@ from src.post_extraction_tasks import clean_and_export, send_email, push_output_
 if __name__ == "__main__":
     clean_and_export.export_events()
     send_email.run_send_email()
-    push_output_to_db.run_postgres_push()
