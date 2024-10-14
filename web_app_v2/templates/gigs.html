@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block styles %}
+    <style>
+        table {
+            width: 100%;
+        }
+        th {
+            text-align: center;
+            width: 33.33%;
+        }
+        td {
+            text-align: center;
+            width: 33.33%;
+        }
+        .colname {
+            text-align: center;
+        }
+        h1 {
+            position: relative; /* Set position to relative to allow absolute positioning of the line */
+        }
+        h1::after {
+            content: "";
+            position: absolute; /* Position the line absolutely */
+            bottom: -10px; /* Adjust this value to control the distance between the text and the line */
+            left: 0;
+            width: 100%; /* Make the line span the entire width of the container */
+            height: 1px; /* Set the height of the line */
+            background-color: #ccc; /* Set the color of the line */
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container main-container">
+        <h1>Upcoming Gigs!</h1>
+        <br>
+        <form action="/gigs", method="POST">
+            {{ form.csrf_token }}
+            <p>
+                {{ form.start_date.label }} {{ form.start_date(class='datepicker') }} {{ form.hidden_tag() }}
+                {{ form.end_date.label }} {{ form.end_date(class='datepicker') }} {{ form.hidden_tag() }}
+            </p>
+            <p>
+                {{ form.venue_filter.label }} {{ form.venue_filter(class="form-control") }} {{ form.hidden_tag() }}
+            </p>
+            <p>
+                {{ form.search_field.label }} {{ form.search_field(size=30) }} {{ form.hidden_tag() }}
+            </p>
+            {{ form.submit }}
+            <button type="submit" formaction="{{ url_for('refresh_filters') }}">Refresh</button>
+        </form>
+        <br>
+        <table id="gig-data" class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col" class="colname">Event</th>
+                    <th scope="col" class="colname">Date</th>
+                    <th scope="col" class="colname">Venue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td><a href="{{ row['Link'] }}" target="_blank">{{ row['Title'] }}</a></td>
+                    <td>{{ row['Date'] }}</td>
+                    <td>{{ row['Venue'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+{% endblock %}
