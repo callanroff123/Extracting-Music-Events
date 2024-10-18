@@ -31,6 +31,14 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return(check_password_hash(self.password_hash, password))
     
+    # Generate a 'Gravatar' icon for a newly registered user, given their email
+    # "d" argument in URL determines what image (identicon) Gravatar provides with users which do not have an avatar with Gravatar
+    # ".encode("utf-8") encodes the string as bytes, since MD5 support requires it"
+    # We then pass the bytes to a hash function ('hexdigest')
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode("utf-8")).hexdigest()
+        return(f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}')
+    
     def __repr__(self):
         return(f"<User {self.username}>")
     
@@ -54,7 +62,7 @@ class Post(db.Model):
     # "so.relationship()" allows us to join the FK field to the PK in another table (and vice-versa) I THINK?!
     # This is not an actual field in the 'Post' table; we still just have id, body, timestamp and user_id
     # We need to specify who the user is when we create a Post instance
-    author: so.Mapped[User] = so.relationship(back_populate = "posts")
+    author: so.Mapped[User] = so.relationship(back_populates = "posts")
 
     def __repr__(self):
         return(f"<Post {self.body}>")
@@ -71,7 +79,7 @@ class Event(db.Model):
         index = True,
         default = lambda: datetime.now(timezone.utc)
     )
-    user_id = so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index = True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index = True)
 
     # A new relationship defined with the User table..
     organiser: so.Mapped[User] = so.relationship(back_populates = "events")

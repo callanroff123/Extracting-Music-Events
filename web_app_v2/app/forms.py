@@ -1,9 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DateField, SelectMultipleField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
 import sqlalchemy as sa
+import pandas as pd
+from datetime import datetime
 from app import db
 from app.models import User
+
+
+try:
+    df = pd.read_csv("../output/music_events.csv")
+    df = df[pd.to_datetime(df["Date"]) >= pd.to_datetime(datetime.now().date())]
+except:
+    df = pd.read_csv("./output/music_events.csv")
+    df = df[pd.to_datetime(df["Date"]) >= pd.to_datetime(datetime.now().date())]
 
 
 class LoginForm(FlaskForm):
@@ -42,3 +52,22 @@ class RegistrationForm(FlaskForm):
         )
         if user is not None:
             raise ValidationError("Please use a different email address.")
+        
+
+class FilterForm(FlaskForm):
+    start_date = DateField(
+        label = "From: ", 
+        format = "%Y-%m-%d"
+    )
+    end_date = DateField(
+        label = "To: ", 
+        format = "%Y-%m-%d"
+    )
+    venue_filter = SelectMultipleField(
+        label = "Filter Venues: ",
+        choices = list(df["Venue"].unique())
+    )
+    search_field = StringField(
+        label = "Keyword: "
+    )
+    submit = SubmitField("OK")
