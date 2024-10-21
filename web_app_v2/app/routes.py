@@ -4,8 +4,9 @@ import sqlalchemy as sa
 from urllib.parse import urlsplit
 from flask_bootstrap import Bootstrap5
 import pandas as pd
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
-from app.forms import LoginForm, RegistrationForm, FilterForm
+from app.forms import LoginForm, RegistrationForm, FilterForm, EditProfileForm
 from app.models import User, Post, Event
 from app import app, db, login
 
@@ -90,6 +91,83 @@ def profile(username):
         "profile.html",
         user = user,
         posts = posts
+    ))
+
+@app.route("/edit_profile", methods = ["GET", "POST"])
+@login_required
+def edit_profile():
+    form = EditProfileForm(original_username = current_user.username)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        flash("Your changes have been saved!")
+        return(redirect(url_for("profile", username = current_user.username)))
+    # For the initial request
+    # When the form is being accessed initially, pre-fill the fields with default/existing user data
+    elif request.method == "GET":
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return(render_template(
+        "edit_profile.html",
+        title = "EditProfile",
+        form = form
+    ))
+
+
+@app.route("/login", methods = ["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return(redirect(url_for("index")))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = db.first_or_404(
+            sa.select(User).where(
+                User.username == form.username.data
+            )
+        )
+        if (user is None) or (not check_password_hash(user.password_hash, form.password.data)):
+            flash("Invalid login credentials")
+            return(redirect(url_for("login")))
+        login_user(user, remember = form.remember_me.data)
+        next_page = request.args.get("next")
+        if (not next_page) or (urlsplit(next_page).netloc != ""):
+            next_page = url_for("index")
+        return(redirect(next_page))
+    return(render_template(
+        "login.html",
+        title = "Sign In",
+        form = form
+    ))
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return(redirect(url_for("index")))
+
+
+@app.route("/register", methods = ["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        flash("Cannot register a new user while logged in.")
+        return(redirect(url_for("index")))
+    form  = RegistrationForm()
+    if form.validate_on_submit():
+        new_user = User(
+            username = form.username.data,
+            email = form.email.data
+        )
+        new_user.set_password(password = form.password.data)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f"Welcome to the community, {form.username.data}!")
+        return(redirect(url_for("login")))
+    return(render_template(
+        "register.html",
+        form = form,
+        title = "Register"
     ))
     
 
